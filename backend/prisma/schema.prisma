@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Parent {
+  id       Int       @id @default(autoincrement())
+  name     String
+  phone    String    @unique
+  email    String    @unique
+  
+  children Student[]
+
+  @@map("parents")
+}
+
+model Student {
+  id            Int                 @id @default(autoincrement())
+  name          String
+  dob           DateTime
+  gender        String
+  currentGrade  String              @map("current_grade")
+  parentId      Int                 @map("parent_id")
+
+  parent        Parent              @relation(fields: [parentId], references: [id])
+  classes       ClassRegistration[]
+  subscriptions Subscription[]
+
+  @@map("students")
+}
+
+model Class {
+  id            Int                 @id @default(autoincrement())
+  subject       String
+  dayOfWeek     String              @map("day_of_week")
+  timeSlot      String              @map("time_slot")
+  teacherName   String              @map("teacher_name")
+  maxStudents   Int                 @map("max_students")
+
+  registrations ClassRegistration[]
+
+  @@map("classes")
+}
+
+model ClassRegistration {
+  id        Int     @id @default(autoincrement())
+  studentId Int     @map("student_id")
+  classId   Int     @map("class_id")
+
+  student   Student @relation(fields: [studentId], references: [id])
+  class     Class   @relation(fields: [classId], references: [id])
+
+  @@unique([studentId, classId])
+  @@map("class_registrations")
+}
+
+model Subscription {
+  id            Int      @id @default(autoincrement())
+  studentId     Int      @map("student_id")
+  packageName   String   @map("package_name")
+  startDate     DateTime @map("start_date")
+  endDate       DateTime @map("end_date")
+  totalSessions Int      @map("total_sessions")
+  usedSessions  Int      @map("used_sessions")
+
+  student       Student  @relation(fields: [studentId], references: [id])
+
+  @@map("subscriptions")
+}
