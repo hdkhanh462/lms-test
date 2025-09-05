@@ -15,7 +15,7 @@ export default class ParentController extends BaseController {
     this.router.get(`${this.path}/:id`, this.getParentById);
   }
 
-  getParentById = async (request: Request, response: Response) => {
+  private getParentById = async (request: Request, response: Response) => {
     const { id } = request.params;
 
     // TODO: Add validation for id
@@ -31,7 +31,7 @@ export default class ParentController extends BaseController {
     return response.status(200).json(parent);
   };
 
-  createParent = async (request: Request, response: Response) => {
+  private createParent = async (request: Request, response: Response) => {
     const { name, phone, email } = request.body;
 
     // TODO: Add validation for name and email

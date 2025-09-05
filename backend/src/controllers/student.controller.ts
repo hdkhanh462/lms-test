@@ -15,7 +15,7 @@ export default class StudentController extends BaseController {
     this.router.get(`${this.path}/:id`, this.getStudentById);
   }
 
-  getStudentById = async (request: Request, response: Response) => {
+  private getStudentById = async (request: Request, response: Response) => {
     const { id } = request.params;
 
     const student = await this.prisma.student.findUnique({
@@ -30,7 +30,7 @@ export default class StudentController extends BaseController {
     return response.status(200).json(student);
   };
 
-  createStudent = async (request: Request, response: Response) => {
+  private createStudent = async (request: Request, response: Response) => {
     const { parentId, name, dob, gender, currentGrade } = request.body;
 
     const newStudent = await this.prisma.student.create({

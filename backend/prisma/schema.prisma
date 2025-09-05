@@ -81,7 +81,7 @@ model Subscription {
   startDate     DateTime @map("start_date")
   endDate       DateTime @map("end_date")
   totalSessions Int      @map("total_sessions")
-  usedSessions  Int      @map("used_sessions")
+  usedSessions  Int      @map("used_sessions") @default(0)
 
   student Student @relation(fields: [studentId], references: [id])
 

@@ -137,7 +137,7 @@ export default class ClassController extends BaseController {
     return `${pad(start)}-${pad(end)}`;
   }
 
-  getClasses = async (request: Request, response: Response) => {
+  private getClasses = async (request: Request, response: Response) => {
     const query = classQuerySchema.parse({
       ...request.query,
       days: request.query.days
@@ -157,7 +157,7 @@ export default class ClassController extends BaseController {
     return response.status(200).json(classes);
   };
 
-  createClass = async (request: Request, response: Response) => {
+  private createClass = async (request: Request, response: Response) => {
     const { subject, dayOfWeek, timeSlot, teacherName, maxStudents } =
       request.body;
 
@@ -194,7 +194,7 @@ export default class ClassController extends BaseController {
     });
   };
 
-  registerClass = async (request: Request, response: Response) => {
+  private registerClass = async (request: Request, response: Response) => {
     const classId = request.params.id;
     const studentId = request.body.studentId;
 
