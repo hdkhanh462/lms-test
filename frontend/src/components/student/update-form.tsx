@@ -33,9 +33,6 @@ type UpdateStudentFormProps = {
   id: number;
 };
 
-// TODO: Fix lỗi ngày sinh không hiển thị đúng dữ liệu khi mở form
-// cần mở form 2 lần mới hiển thị đúng dữ liệu
-
 export default function UpdateStudentForm({ id }: UpdateStudentFormProps) {
   const { mutate, isPending } = useUpdateStudent();
   const { data, isLoading: isGetDetailLoading } = useGetStudentById(id);
@@ -53,7 +50,10 @@ export default function UpdateStudentForm({ id }: UpdateStudentFormProps) {
 
   useEffect(() => {
     if (data) {
-      form.reset(data);
+      form.reset({
+        ...data,
+        dob: data.dob instanceof Date ? data.dob : new Date(data.dob),
+      });
     }
   }, [data, form]);
 

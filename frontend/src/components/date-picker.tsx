@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { vi } from "react-day-picker/locale";
 
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,14 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(value);
 
+  const dateLabel = date
+    ? (date instanceof Date ? date : new Date(date)).toLocaleDateString()
+    : "Chọn ngày";
+
+  useEffect(() => {
+    setDate(value);
+  }, [value]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -29,12 +37,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
           id="date"
           className="justify-between font-normal"
         >
-          {date
-            ? (date instanceof Date
-                ? date
-                : new Date(date)
-              ).toLocaleDateString()
-            : "Chọn ngày"}
+          {dateLabel}
           <CalendarIcon />
         </Button>
       </PopoverTrigger>
