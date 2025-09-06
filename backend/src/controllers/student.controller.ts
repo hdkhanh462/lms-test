@@ -1,5 +1,6 @@
 import { BaseController } from "@/controllers/abstractions/base.controller";
 import HttpException from "@/exceptions/http-exception";
+import { studentSchema } from "@/validations/schemas/student.schema";
 import { Request, Response } from "express";
 
 export default class StudentController extends BaseController {
@@ -12,6 +13,7 @@ export default class StudentController extends BaseController {
 
   public initializeRoutes() {
     this.router.post(this.path, this.createStudent);
+    this.router.get(this.path, this.getStudents);
     this.router.get(`${this.path}/:id`, this.getStudentById);
   }
 
@@ -30,14 +32,29 @@ export default class StudentController extends BaseController {
     return response.status(200).json(student);
   };
 
+  private getStudents = async (request: Request, response: Response) => {
+    const students = await this.prisma.student.findMany({
+      include: {
+        parent: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    return response.status(200).json(students);
+  };
+
   private createStudent = async (request: Request, response: Response) => {
-    const { parentId, name, dob, gender, currentGrade } = request.body;
+    const { parentId, name, dob, gender, currentGrade } = studentSchema.parse(
+      request.body
+    );
 
     const newStudent = await this.prisma.student.create({
       data: {
         parentId: Number(parentId),
         name,
-        dob,
+        dob: dob.toLocaleDateString("vi-VN"),
         gender,
         currentGrade,
       },

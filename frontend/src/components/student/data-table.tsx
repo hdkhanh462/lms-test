@@ -10,17 +10,10 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import {
-  ArrowUpDown,
-  ChevronDown,
-  MoreHorizontal,
-  PlusIcon,
-} from "lucide-react";
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 import * as React from "react";
 
-import AddParentForm from "@/components/parents/add-form";
-import UpdateParentForm from "@/components/parents/update-form";
-import AddStudentForm from "@/components/student/add-form";
+import UpdateStudentForm from "@/components/student/update-form";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -49,9 +42,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { ParentWithIdInput } from "@/validations/schemas/parent.schema";
+import {
+  genderOptions,
+  type StudentWithIdInput,
+} from "@/validations/schemas/student.schema";
 
-const columns: ColumnDef<ParentWithIdInput>[] = [
+const columns: ColumnDef<StudentWithIdInput>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -76,20 +72,6 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
   },
   {
     accessorKey: "name",
-    header: "Họ và tên",
-    cell: ({ row }) => (
-      <div className="capitalize font-medium">{row.getValue("name")}</div>
-    ),
-  },
-  {
-    accessorKey: "phone",
-    header: "Số điện thoại",
-    cell: ({ row }) => {
-      return <div>{row.getValue("phone")}</div>;
-    },
-  },
-  {
-    accessorKey: "email",
     header: ({ column }) => {
       return (
         <Button
@@ -97,18 +79,61 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="w-full justify-start !px-0"
         >
-          Email
+          Họ và tên
           <ArrowUpDown />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize font-medium">{row.getValue("name")}</div>
+    ),
+  },
+  {
+    accessorKey: "dob",
+    header: "Ngày sinh",
+    cell: ({ row }) => {
+      const formattedDate = new Date(row.getValue("dob")).toLocaleDateString(
+        "vi-VN",
+        { year: "numeric", month: "2-digit", day: "2-digit" }
+      );
+      return <div>{formattedDate}</div>;
+    },
+  },
+  {
+    accessorKey: "gender",
+    header: "Giới tính",
+    cell: ({ row }) => {
+      return (
+        <div>
+          {genderOptions[row.getValue("gender") as keyof typeof genderOptions]}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "currentGrade",
+    header: "Lớp hiện tại",
+    cell: ({ row }) => {
+      return <div>{row.getValue("currentGrade")}</div>;
+    },
+  },
+  {
+    accessorKey: "parentId",
+    header: "Phụ huynh",
+    cell: ({ row }) => {
+      return (
+        <Button variant="outline" size="sm">
+          {/* {row.getValue("parentId")} */}
+          Chi tiết
+        </Button>
+      );
+    },
   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const parent = row.original;
+      const student = row.original;
 
       return (
         <DropdownMenu>
@@ -122,7 +147,7 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
             <DropdownMenuLabel>Hành động</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
-                navigator.clipboard.writeText(parent.id.toString())
+                navigator.clipboard.writeText(student.id.toString())
               }
             >
               Sao chép ID
@@ -135,31 +160,15 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
               </DialogTrigger>
               <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
                 <DialogHeader>
-                  <DialogTitle>Chi tiết thông tin phụ huynh</DialogTitle>
+                  <DialogTitle>Chi tiết thông tin học sinh</DialogTitle>
                   <DialogDescription>
-                    Cập nhật thông tin phụ huynh.
+                    Cập nhật thông tin học sinh.
                   </DialogDescription>
                 </DialogHeader>
-                <UpdateParentForm initialData={parent} />
+                <UpdateStudentForm initialData={student} />
               </DialogContent>
             </Dialog>
             <DropdownMenuSeparator />
-            <Dialog>
-              <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  Thêm học sinh
-                </DropdownMenuItem>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Thêm mới học sinh</DialogTitle>
-                  <DialogDescription>
-                    Vui lòng điền thông tin học sinh.
-                  </DialogDescription>
-                </DialogHeader>
-                <AddStudentForm parentId={parent.id} />
-              </DialogContent>
-            </Dialog>
             <DropdownMenuItem>Xóa</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -168,7 +177,7 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
   },
 ];
 
-export function ParentDataTable({ data }: { data: ParentWithIdInput[] }) {
+export function StudentDataTable({ data }: { data: StudentWithIdInput[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -200,30 +209,14 @@ export function ParentDataTable({ data }: { data: ParentWithIdInput[] }) {
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Tìm kiếm theo email..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          placeholder="Tìm kiếm theo tên..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn("name")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
         <div className="ml-auto flex items-center gap-2">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon">
-                <PlusIcon />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Thêm mới phụ huynh</DialogTitle>
-                <DialogDescription>
-                  Vui lòng điền thông tin phụ huynh.
-                </DialogDescription>
-              </DialogHeader>
-              <AddParentForm />
-            </DialogContent>
-          </Dialog>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">

@@ -1,21 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDispatch } from "react-redux";
 
 import { QUERY_KEY } from "@/constants/querry-key";
 import api from "@/lib/axios";
-import {
-  addParent,
-  updateParent,
-  type Parent,
-} from "@/lib/redux/slices/parent.slice";
+import type {
+  ParentInput,
+  ParentWithIdInput,
+} from "@/validations/schemas/parent.schema";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
 export const useFetchParents = () => {
-  return useQuery<Parent[], Error>({
+  return useQuery<ParentWithIdInput[], Error>({
     queryKey: [QUERY_KEY.PARENTS],
     queryFn: async () => {
-      const response = await api.get<Parent[]>(`/${QUERY_KEY.PARENTS}`);
+      const response = await api.get<ParentWithIdInput[]>(
+        `/${QUERY_KEY.PARENTS}`
+      );
       return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 phút
@@ -24,22 +24,17 @@ export const useFetchParents = () => {
 
 export const useAddParent = () => {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
-  return useMutation<
-    Parent,
-    Error,
-    { name: string; phone: string; email: string }
-  >({
+  return useMutation<ParentWithIdInput, Error, ParentInput>({
     mutationFn: async (newParent) => {
-      const response = await api.post<Parent>(
+      const response = await api.post<ParentWithIdInput>(
         `/${QUERY_KEY.PARENTS}`,
         newParent
       );
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.PARENTS] });
-      dispatch(addParent(data));
+      toast.success("Thêm phụ huynh thành công");
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
@@ -54,22 +49,17 @@ export const useAddParent = () => {
 
 export const useUpdateParent = () => {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
-  return useMutation<
-    Parent,
-    Error,
-    { id: number; name: string; phone: string; email: string }
-  >({
+  return useMutation<ParentWithIdInput, Error, ParentWithIdInput>({
     mutationFn: async (updatedParent) => {
-      const response = await api.put<Parent>(
+      const response = await api.put<ParentWithIdInput>(
         `/${QUERY_KEY.PARENTS}/${updatedParent.id}`,
         updatedParent
       );
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.PARENTS] });
-      dispatch(updateParent(data));
+      toast.success("Cập nhật phụ huynh thành công");
     },
   });
 };

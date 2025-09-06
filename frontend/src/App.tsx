@@ -1,6 +1,6 @@
 import ClassTab from "@/components/class-tab";
 import ParentTab from "@/components/parents/tab";
-import StudentTab from "@/components/student-tab";
+import StudentTab from "@/components/student/tab";
 import SubscriptionTab from "@/components/subscription-tab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 

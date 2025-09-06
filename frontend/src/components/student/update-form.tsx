@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
-import z from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,35 +12,34 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useUpdateParent } from "@/data/parent";
-import { parentSchema } from "@/validations/schemas/parent.schema";
+import { useUpdateStudent } from "@/data/student";
+import {
+  Gender,
+  updateStudentSchema,
+  type StudentWithIdInput,
+} from "@/validations/schemas/student.schema";
 
-const updateSchema = parentSchema.extend({
-  id: z.number(),
-});
-
-type ParentUpdateInput = z.infer<typeof updateSchema>;
-
-type UpdateParentFormProps = {
-  initialData: ParentUpdateInput;
+type UpdateStudentFormProps = {
+  initialData: StudentWithIdInput;
 };
 
-export default function UpdateParentForm({
+export default function UpdateStudentForm({
   initialData,
-}: UpdateParentFormProps) {
-  const { mutate, isPending } = useUpdateParent();
+}: UpdateStudentFormProps) {
+  const { mutate, isPending } = useUpdateStudent();
 
-  const form = useForm<ParentUpdateInput>({
-    resolver: zodResolver(updateSchema),
+  const form = useForm<StudentWithIdInput>({
+    resolver: zodResolver(updateStudentSchema),
     defaultValues: initialData || {
       id: 0,
       name: "",
-      phone: "",
-      email: "",
+      dob: "",
+      gender: Gender.Other,
+      currentGrade: "",
     },
   });
 
-  function onSubmit(values: ParentUpdateInput) {
+  function onSubmit(values: StudentWithIdInput) {
     console.log(values);
     mutate(values);
   }
@@ -52,6 +50,18 @@ export default function UpdateParentForm({
         <FormField
           control={form.control}
           name="id"
+          render={({ field }) => (
+            <FormItem hidden>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="parentId"
           render={({ field }) => (
             <FormItem hidden>
               <FormControl>
@@ -76,12 +86,12 @@ export default function UpdateParentForm({
         />
         <FormField
           control={form.control}
-          name="phone"
+          name="dob"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone</FormLabel>
+              <FormLabel>Ngày sinh</FormLabel>
               <FormControl>
-                <Input placeholder="Số điện thoại" {...field} />
+                <Input placeholder="Ngày sinh" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -89,12 +99,26 @@ export default function UpdateParentForm({
         />
         <FormField
           control={form.control}
-          name="email"
+          name="gender"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Giới tính</FormLabel>
               <FormControl>
-                <Input placeholder="Email" {...field} />
+                <Input placeholder="Giới tính" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="currentGrade"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Khối hiện tại</FormLabel>
+              <FormControl>
+                <Input placeholder="Khối hiện tại" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

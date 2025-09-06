@@ -10,4 +10,10 @@ export const parentSchema = z.object({
   email: z.email({ message: "Email không hợp lệ." }),
 });
 
+export const updateParentSchema = parentSchema.extend({
+  id: z.number(),
+});
+
+export type ParentWithIdInput = z.infer<typeof updateParentSchema>;
+
 export type ParentInput = z.infer<typeof parentSchema>;

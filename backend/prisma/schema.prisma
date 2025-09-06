@@ -28,7 +28,7 @@ model Student {
   id           Int    @id @default(autoincrement())
   name         String
   dob          String
-  gender       Gender
+  gender       Gender?
   currentGrade String @map("current_grade")
   parentId     Int    @map("parent_id")
 
