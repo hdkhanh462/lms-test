@@ -55,9 +55,9 @@ export default class StudentController extends BaseController {
 
     const newStudent = await this.prisma.student.create({
       data: {
-        parentId: Number(parentId),
+        parentId,
         name,
-        dob: dob.toLocaleDateString("vi-VN"),
+        dob: dob.toDateString(),
         gender,
         currentGrade,
       },

@@ -23,21 +23,21 @@ const parentData: Prisma.ParentCreateInput[] = [
 const studentData: Prisma.StudentCreateManyInput[] = [
   {
     name: "Nguyen Thi X",
-    dob: "2010-05-15",
+    dob: new Date("2010-05-15").toDateString(),
     gender: Gender.FEMALE,
     currentGrade: "12A",
     parentId: 1,
   },
   {
     name: "Tran Van Y",
-    dob: "2011-08-20",
+    dob: new Date("2011-08-20").toDateString(),
     gender: Gender.MALE,
     currentGrade: "12B",
     parentId: 2,
   },
   {
     name: "Le Thi Z",
-    dob: "2012-03-10",
+    dob: new Date("2012-03-10").toDateString(),
     gender: Gender.FEMALE,
     currentGrade: "12C",
     parentId: 3,

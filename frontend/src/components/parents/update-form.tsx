@@ -107,7 +107,15 @@ export default function UpdateParentForm({ id }: UpdateParentFormProps) {
           )}
         />
 
-        <Button type="submit" disabled={isUpdatePending || isGetDetailLoading}>
+        <Button
+          type="submit"
+          disabled={
+            isUpdatePending ||
+            isGetDetailLoading ||
+            !data ||
+            !form.formState.isDirty
+          }
+        >
           {isUpdatePending && <Loader2 className="animate-spin" />}
           Cập nhật
         </Button>

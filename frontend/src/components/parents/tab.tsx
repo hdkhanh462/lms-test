@@ -2,14 +2,10 @@ import { ParentDataTable } from "@/components/parents/data-table";
 import { useFetchParents } from "@/data/parent";
 
 export default function ParentTab() {
-  const { data, isLoading, error } = useFetchParents();
+  const { data, isLoading } = useFetchParents();
 
   if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error.message}</div>;
+    return <div>Đang tải...</div>;
   }
 
   return (

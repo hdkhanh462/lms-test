@@ -48,6 +48,7 @@ export default function RegisterClassForm({ classId }: { classId: number }) {
             </FormItem>
           )}
         />
+        {/* TODO: Tìm kiếm học sinh và chọn */}
         <FormField
           control={form.control}
           name="studentId"
@@ -62,7 +63,7 @@ export default function RegisterClassForm({ classId }: { classId: number }) {
           )}
         />
 
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending || !form.formState.isDirty}>
           {isPending && <Loader2 className="animate-spin" />}
           Đăng ký lớp học
         </Button>

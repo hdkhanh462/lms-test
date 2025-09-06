@@ -11,19 +11,34 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import type { DateRange } from "react-day-picker";
 
 type DatePickerProps = {
-  value?: Date;
-  onChange?: (value: Date | undefined) => void;
+  value?: DateRange;
+  onChange?: (value?: DateRange) => void;
 };
 
-export function DatePicker({ value, onChange }: DatePickerProps) {
+export function DateRangePicker({ value, onChange }: DatePickerProps) {
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState<Date | undefined>(value);
+  const [date, setDate] = useState<DateRange | undefined>(value);
 
-  const dateLabel = date
-    ? (date instanceof Date ? date : new Date(date)).toLocaleDateString()
-    : "Chọn ngày";
+  const formatedDate = {
+    from: date?.from
+      ? date.from instanceof Date
+        ? date.from
+        : new Date(date.from)
+      : undefined,
+    to: date?.to
+      ? date.to instanceof Date
+        ? date.to
+        : new Date(date.to)
+      : undefined,
+  };
+
+  const displayDate =
+    formatedDate.from && formatedDate.to
+      ? `${formatedDate.from.toLocaleDateString()} - ${formatedDate.to.toLocaleDateString()}`
+      : "Chọn ngày";
 
   useEffect(() => {
     setDate(value);
@@ -37,13 +52,13 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
           id="date"
           className="justify-between font-normal"
         >
-          {dateLabel}
+          {displayDate}
           <CalendarIcon />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto overflow-hidden p-0" align="start">
         <Calendar
-          mode="single"
+          mode="range"
           locale={vi}
           selected={date}
           onSelect={(date) => {

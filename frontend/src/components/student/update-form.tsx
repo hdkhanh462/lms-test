@@ -42,6 +42,7 @@ export default function UpdateStudentForm({ id }: UpdateStudentFormProps) {
     defaultValues: data || {
       id,
       parentId: 0,
+      gender: Gender.Male,
       name: "",
       currentGrade: "",
     },
@@ -49,8 +50,10 @@ export default function UpdateStudentForm({ id }: UpdateStudentFormProps) {
 
   useEffect(() => {
     if (data) {
-      console.log("data", data);
-      form.reset(data);
+      form.reset({
+        ...data,
+        dob: data.dob instanceof Date ? data.dob : new Date(data.dob),
+      });
     }
   }, [data, form]);
 
@@ -154,7 +157,12 @@ export default function UpdateStudentForm({ id }: UpdateStudentFormProps) {
           )}
         />
 
-        <Button type="submit" disabled={isPending || isGetDetailLoading}>
+        <Button
+          type="submit"
+          disabled={
+            isPending || isGetDetailLoading || !data || !form.formState.isDirty
+          }
+        >
           {isPending && <Loader2 className="animate-spin" />}
           Cập nhật
         </Button>

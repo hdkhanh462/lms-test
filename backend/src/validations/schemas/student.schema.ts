@@ -15,7 +15,7 @@ export const genderOptions = {
 export const studentSchema = z.object({
   parentId: z.number(),
   name: z.string().min(2, { message: "Họ và tên phải có ít nhất 2 ký tự." }),
-  dob: z.date({ message: "Ngày sinh không hợp lệ." }),
+  dob: z.coerce.date<Date>({ message: "Ngày sinh không hợp lệ." }),
   gender: z.enum(Gender).optional(),
   currentGrade: z.string().min(1, { message: "Lớp hiện tại là bắt buộc." }),
 });

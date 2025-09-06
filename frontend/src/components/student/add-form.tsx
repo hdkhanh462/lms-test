@@ -131,7 +131,7 @@ export default function AddStudentForm({ parentId }: AddStudentFormProps) {
           )}
         />
 
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending || !form.formState.isDirty}>
           {isPending && <Loader2 className="animate-spin" />}
           Thêm mới
         </Button>
