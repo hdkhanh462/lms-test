@@ -10,6 +10,7 @@ import type {
   ClassWithIdInput,
   dayQueryOptions,
 } from "@/validations/schemas/class.schema";
+import type { StudentWithIdInput } from "@/validations/schemas/student.schema";
 
 export const useFetchClasses = () => {
   const [dayFilter, setDayFilter] = useState<keyof typeof dayQueryOptions>();
@@ -29,6 +30,19 @@ export const useFetchClasses = () => {
     dayFilter,
     setDayFilter,
   };
+};
+
+export const useFetchStudentsInClass = (classId: number) => {
+  return useQuery<StudentWithIdInput[], Error>({
+    queryKey: [QUERY_KEY.CLASSES, classId, "students"],
+    queryFn: async () => {
+      const response = await api.get<StudentWithIdInput[]>(
+        `/${QUERY_KEY.CLASSES}/${classId}/students`
+      );
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 phút
+  });
 };
 
 export const useAddClass = () => {
@@ -81,6 +95,31 @@ export const useUpdateClass = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.CLASSES] });
       toast.success("Cập nhật lớp học thành công");
+    },
+  });
+};
+
+export const useRegisterClass = (classId: number) => {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, { studentId: number }>({
+    mutationFn: async ({ studentId }) => {
+      await api.post(`/${QUERY_KEY.CLASSES}/${classId}/register`, {
+        studentId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.CLASSES, classId, "students"],
+      });
+      toast.success("Đăng ký học sinh thành công");
+    },
+    onError: (error) => {
+      if (error instanceof AxiosError) {
+        console.log(error.response?.data);
+        toast.error("Lỗi khi đăng ký học sinh", {
+          description: error.response?.data?.message,
+        });
+      }
     },
   });
 };

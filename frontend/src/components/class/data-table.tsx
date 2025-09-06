@@ -14,6 +14,7 @@ import { ArrowUpDown, MoreHorizontal, PlusIcon } from "lucide-react";
 import * as React from "react";
 
 import AddClassForm from "@/components/class/add-form";
+import StudentListDialog from "@/components/class/student-list-dialog";
 import UpdateClassForm from "@/components/class/update-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -121,7 +122,7 @@ const columns: ColumnDef<ClassWithIdInput>[] = [
   },
   {
     accessorKey: "dayOfWeek",
-    header: "Ngày trong tuần",
+    header: "Ngày học trong tuần",
     cell: ({ row }) => (
       <div>
         {(row.getValue("dayOfWeek") as string[]).map((day) => (
@@ -171,6 +172,7 @@ const columns: ColumnDef<ClassWithIdInput>[] = [
                 <UpdateClassForm id={_class.id} />
               </DialogContent>
             </Dialog>
+            <StudentListDialog classId={_class.id} />
             <DropdownMenuSeparator />
             <DropdownMenuItem>Xóa</DropdownMenuItem>
           </DropdownMenuContent>

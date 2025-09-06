@@ -112,7 +112,7 @@ const columns: ColumnDef<StudentWithIdInput>[] = [
   },
   {
     accessorKey: "currentGrade",
-    header: "Lớp hiện tại",
+    header: "Khối",
     cell: ({ row }) => {
       return <div>{row.getValue("currentGrade")}</div>;
     },
@@ -189,7 +189,37 @@ const columns: ColumnDef<StudentWithIdInput>[] = [
   },
 ];
 
-export function StudentDataTable({ data }: { data: StudentWithIdInput[] }) {
+function InClassActions({ student }: { student: StudentWithIdInput }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+        <DropdownMenuItem
+          onClick={() => navigator.clipboard.writeText(student.id.toString())}
+        >
+          Sao chép ID
+        </DropdownMenuItem>
+        {/* TODO: Kiểm tra hôm nay đã học chưa */}
+        <DropdownMenuItem>Đánh dấu đã học</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>Hủy đăng ký</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+type Props = {
+  data: StudentWithIdInput[];
+  classId: number;
+};
+
+export function StudentDataTable({ data, classId }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -198,9 +228,22 @@ export function StudentDataTable({ data }: { data: StudentWithIdInput[] }) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
+  const mappedColumns = classId
+    ? columns.map((col) =>
+        col.id === "actions"
+          ? {
+              ...col,
+              cell: ({ row }: { row: { original: StudentWithIdInput } }) => (
+                <InClassActions student={row.original} />
+              ),
+            }
+          : col
+      )
+    : columns;
+
   const table = useReactTable({
     data,
-    columns,
+    columns: mappedColumns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

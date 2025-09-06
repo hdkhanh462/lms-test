@@ -56,5 +56,14 @@ export const classUpdateSchema = classSchema.extend({
   id: z.number().int().positive(),
 });
 
+export const classRegisterSchema = z.object({
+  classId: z.number().int().positive(),
+  studentId: z
+    .number()
+    .int()
+    .positive({ message: "Mã học sinh không hợp lệ." }),
+});
+
 export type ClassInput = z.infer<typeof classSchema>;
 export type ClassWithIdInput = z.infer<typeof classUpdateSchema>;
+export type ClassRegisterInput = z.infer<typeof classRegisterSchema>;

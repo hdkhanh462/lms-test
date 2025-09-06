@@ -33,6 +33,7 @@ export default class ClassController extends BaseController {
   public initializeRoutes() {
     this.router.post(this.path, this.createClass);
     this.router.get(`${this.path}/:id`, this.getClassById);
+    this.router.get(`${this.path}/:id/students`, this.getStudentsInClassById);
     this.router.post(`${this.path}/:id/register`, this.registerClass);
     this.router.get(this.path, this.getClasses);
   }
@@ -167,6 +168,20 @@ export default class ClassController extends BaseController {
       throw new HttpException(404, "Lớp học không tồn tại");
     }
     return response.status(200).json(existingClass);
+  };
+
+  private getStudentsInClassById = async (
+    request: Request,
+    response: Response
+  ) => {
+    const { id } = request.params;
+    const students = await this.prisma.classRegistration.findMany({
+      where: { classId: Number(id) },
+      include: { student: true },
+    });
+    return response
+      .status(200)
+      .json(students.map((registration) => registration.student));
   };
 
   private createClass = async (request: Request, response: Response) => {
