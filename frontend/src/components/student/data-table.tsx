@@ -10,9 +10,10 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import * as React from "react";
 
+import UpdateParentForm from "@/components/parents/update-form";
 import UpdateStudentForm from "@/components/student/update-form";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,7 +27,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -122,10 +122,22 @@ const columns: ColumnDef<StudentWithIdInput>[] = [
     header: "Phụ huynh",
     cell: ({ row }) => {
       return (
-        <Button variant="outline" size="sm">
-          {/* {row.getValue("parentId")} */}
-          Chi tiết
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              Chi tiết
+            </Button>
+          </DialogTrigger>
+          <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+            <DialogHeader>
+              <DialogTitle>Chi tiết thông tin phụ huynh</DialogTitle>
+              <DialogDescription>
+                Cập nhật thông tin phụ huynh.
+              </DialogDescription>
+            </DialogHeader>
+            <UpdateParentForm id={row.getValue("parentId")} />
+          </DialogContent>
+        </Dialog>
       );
     },
   },
@@ -165,7 +177,7 @@ const columns: ColumnDef<StudentWithIdInput>[] = [
                     Cập nhật thông tin học sinh.
                   </DialogDescription>
                 </DialogHeader>
-                <UpdateStudentForm initialData={student} />
+                <UpdateStudentForm id={student.id} />
               </DialogContent>
             </Dialog>
             <DropdownMenuSeparator />
@@ -216,34 +228,6 @@ export function StudentDataTable({ data }: { data: StudentWithIdInput[] }) {
           }
           className="max-w-sm"
         />
-        <div className="ml-auto flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Hàng <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -299,24 +283,6 @@ export function StudentDataTable({ data }: { data: StudentWithIdInput[] }) {
         <div className="text-muted-foreground flex-1 text-sm">
           {table.getFilteredSelectedRowModel().rows.length} trên{" "}
           {table.getFilteredRowModel().rows.length} hàng đã được chọn
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Trước
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Sau
-          </Button>
         </div>
       </div>
     </div>

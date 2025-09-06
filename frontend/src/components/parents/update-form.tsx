@@ -13,8 +13,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useUpdateParent } from "@/data/parent";
+import { useGetParentById, useUpdateParent } from "@/data/parent";
 import { parentSchema } from "@/validations/schemas/parent.schema";
+import { useEffect } from "react";
 
 const updateSchema = parentSchema.extend({
   id: z.number(),
@@ -23,23 +24,28 @@ const updateSchema = parentSchema.extend({
 type ParentUpdateInput = z.infer<typeof updateSchema>;
 
 type UpdateParentFormProps = {
-  initialData: ParentUpdateInput;
+  id: number;
 };
 
-export default function UpdateParentForm({
-  initialData,
-}: UpdateParentFormProps) {
-  const { mutate, isPending } = useUpdateParent();
+export default function UpdateParentForm({ id }: UpdateParentFormProps) {
+  const { mutate, isPending: isUpdatePending } = useUpdateParent();
+  const { data, isLoading: isGetDetailLoading } = useGetParentById(id);
 
   const form = useForm<ParentUpdateInput>({
     resolver: zodResolver(updateSchema),
-    defaultValues: initialData || {
-      id: 0,
+    defaultValues: data || {
+      id,
       name: "",
       phone: "",
       email: "",
     },
   });
+
+  useEffect(() => {
+    if (data) {
+      form.reset(data);
+    }
+  }, [data, form]);
 
   function onSubmit(values: ParentUpdateInput) {
     console.log(values);
@@ -66,7 +72,7 @@ export default function UpdateParentForm({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Họ và tên</FormLabel>
               <FormControl>
                 <Input placeholder="Họ và tên" {...field} />
               </FormControl>
@@ -79,7 +85,7 @@ export default function UpdateParentForm({
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone</FormLabel>
+              <FormLabel>Số điện thoại</FormLabel>
               <FormControl>
                 <Input placeholder="Số điện thoại" {...field} />
               </FormControl>
@@ -101,8 +107,8 @@ export default function UpdateParentForm({
           )}
         />
 
-        <Button type="submit" disabled={isPending}>
-          {isPending && <Loader2 className="animate-spin" />}
+        <Button type="submit" disabled={isUpdatePending || isGetDetailLoading}>
+          {isUpdatePending && <Loader2 className="animate-spin" />}
           Cập nhật
         </Button>
       </form>

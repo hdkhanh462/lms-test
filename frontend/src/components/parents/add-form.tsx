@@ -42,7 +42,7 @@ export default function AddParentForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Họ và tên</FormLabel>
               <FormControl>
                 <Input placeholder="Họ và tên" {...field} />
               </FormControl>
@@ -55,7 +55,7 @@ export default function AddParentForm() {
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone</FormLabel>
+              <FormLabel>Số điện thoại</FormLabel>
               <FormControl>
                 <Input placeholder="Số điện thoại" {...field} />
               </FormControl>

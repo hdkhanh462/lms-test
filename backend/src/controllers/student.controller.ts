@@ -29,7 +29,10 @@ export default class StudentController extends BaseController {
       throw new HttpException(404, `Không tìm thấy học sinh với id '${id}'`);
     }
 
-    return response.status(200).json(student);
+    return response.status(200).json({
+      ...student,
+      dob: new Date(student.dob),
+    });
   };
 
   private getStudents = async (request: Request, response: Response) => {

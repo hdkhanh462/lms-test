@@ -47,6 +47,18 @@ export const useAddParent = () => {
   });
 };
 
+export const useGetParentById = (id: number) => {
+  return useQuery<ParentWithIdInput, Error>({
+    queryKey: [QUERY_KEY.PARENTS, id],
+    queryFn: async () => {
+      const response = await api.get<ParentWithIdInput>(
+        `/${QUERY_KEY.PARENTS}/${id}`
+      );
+      return response.data;
+    },
+  });
+};
+
 export const useUpdateParent = () => {
   const queryClient = useQueryClient();
   return useMutation<ParentWithIdInput, Error, ParentWithIdInput>({

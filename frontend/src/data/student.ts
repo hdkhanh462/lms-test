@@ -47,6 +47,18 @@ export const useAddStudent = () => {
   });
 };
 
+export const useGetStudentById = (id: number) => {
+  return useQuery<StudentWithIdInput, Error>({
+    queryKey: [QUERY_KEY.STUDENTS, id],
+    queryFn: async () => {
+      const response = await api.get<StudentWithIdInput>(
+        `/${QUERY_KEY.STUDENTS}/${id}`
+      );
+      return response.data;
+    },
+  });
+};
+
 export const useUpdateStudent = () => {
   const queryClient = useQueryClient();
   return useMutation<StudentWithIdInput, Error, StudentWithIdInput>({

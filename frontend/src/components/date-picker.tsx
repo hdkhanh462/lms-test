@@ -29,7 +29,12 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
           id="date"
           className="justify-between font-normal"
         >
-          {date ? date.toLocaleDateString() : "Chọn ngày"}
+          {date
+            ? (date instanceof Date
+                ? date
+                : new Date(date)
+              ).toLocaleDateString()
+            : "Chọn ngày"}
           <ChevronDownIcon />
         </Button>
       </PopoverTrigger>
@@ -40,8 +45,6 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
           captionLayout="dropdown"
           locale={vi}
           onSelect={(date) => {
-            const formattedDate = date ? date.toLocaleDateString("vi-VN") : "";
-            console.log("Selected date:", formattedDate);
             onChange?.(date || undefined);
             setDate(date);
             setOpen(false);

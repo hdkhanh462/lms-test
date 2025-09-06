@@ -32,6 +32,7 @@ export default class ClassController extends BaseController {
 
   public initializeRoutes() {
     this.router.post(this.path, this.createClass);
+    this.router.get(`${this.path}/:id`, this.getClassById);
     this.router.post(`${this.path}/:id/register`, this.registerClass);
     this.router.get(this.path, this.getClasses);
   }
@@ -155,6 +156,17 @@ export default class ClassController extends BaseController {
     });
 
     return response.status(200).json(classes);
+  };
+
+  private getClassById = async (request: Request, response: Response) => {
+    const { id } = request.params;
+    const existingClass = await this.prisma.class.findUnique({
+      where: { id: Number(id) },
+    });
+    if (!existingClass) {
+      throw new HttpException(404, "Lớp học không tồn tại");
+    }
+    return response.status(200).json(existingClass);
   };
 
   private createClass = async (request: Request, response: Response) => {

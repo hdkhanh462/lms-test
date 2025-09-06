@@ -1,4 +1,4 @@
-import ClassTab from "@/components/class-tab";
+import ClassTab from "@/components/class/tab";
 import ParentTab from "@/components/parents/tab";
 import StudentTab from "@/components/student/tab";
 import SubscriptionTab from "@/components/subscription-tab";
@@ -8,7 +8,7 @@ export default function App() {
   return (
     <main>
       <section className="container mx-auto my-8 px-4 space-y-8">
-        <h1 className="text-2xl font-bold text-center">Hello world</h1>
+        <h1 className="text-2xl font-bold text-center">TeenUp LMS Test</h1>
         <Tabs defaultValue="parent">
           <TabsList>
             <TabsTrigger value="parent">Phụ huynh</TabsTrigger>

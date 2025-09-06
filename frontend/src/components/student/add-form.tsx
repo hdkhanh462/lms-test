@@ -68,7 +68,7 @@ export default function AddStudentForm({ parentId }: AddStudentFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Họ và tên</FormLabel>
               <FormControl>
                 <Input placeholder="Họ và tên" {...field} />
               </FormControl>
@@ -83,7 +83,6 @@ export default function AddStudentForm({ parentId }: AddStudentFormProps) {
             <FormItem>
               <FormLabel>Ngày sinh</FormLabel>
               <FormControl>
-                {/* <Input placeholder="Ngày sinh" {...field} /> */}
                 <DatePicker
                   value={field.value}
                   onChange={(date) => field.onChange(date)}
@@ -100,7 +99,6 @@ export default function AddStudentForm({ parentId }: AddStudentFormProps) {
             <FormItem>
               <FormLabel>Giới tính</FormLabel>
               <FormControl>
-                {/* <Input placeholder="Giới tính" {...field} /> */}
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Giới tính" />

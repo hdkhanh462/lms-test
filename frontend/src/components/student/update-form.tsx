@@ -1,7 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
+import { DatePicker } from "@/components/date-picker";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,32 +14,45 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useUpdateStudent } from "@/data/student";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useGetStudentById, useUpdateStudent } from "@/data/student";
 import {
   Gender,
+  genderOptions,
   updateStudentSchema,
   type StudentWithIdInput,
 } from "@/validations/schemas/student.schema";
 
 type UpdateStudentFormProps = {
-  initialData: StudentWithIdInput;
+  id: number;
 };
 
-export default function UpdateStudentForm({
-  initialData,
-}: UpdateStudentFormProps) {
+export default function UpdateStudentForm({ id }: UpdateStudentFormProps) {
   const { mutate, isPending } = useUpdateStudent();
+  const { data, isLoading: isGetDetailLoading } = useGetStudentById(id);
 
   const form = useForm<StudentWithIdInput>({
     resolver: zodResolver(updateStudentSchema),
-    defaultValues: initialData || {
-      id: 0,
+    defaultValues: data || {
+      id,
+      parentId: 0,
       name: "",
-      dob: "",
-      gender: Gender.Other,
       currentGrade: "",
     },
   });
+
+  useEffect(() => {
+    if (data) {
+      console.log("data", data);
+      form.reset(data);
+    }
+  }, [data, form]);
 
   function onSubmit(values: StudentWithIdInput) {
     console.log(values);
@@ -76,7 +91,7 @@ export default function UpdateStudentForm({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Họ và tên</FormLabel>
               <FormControl>
                 <Input placeholder="Họ và tên" {...field} />
               </FormControl>
@@ -91,7 +106,10 @@ export default function UpdateStudentForm({
             <FormItem>
               <FormLabel>Ngày sinh</FormLabel>
               <FormControl>
-                <Input placeholder="Ngày sinh" {...field} />
+                <DatePicker
+                  value={field.value}
+                  onChange={(date) => field.onChange(date)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -104,7 +122,18 @@ export default function UpdateStudentForm({
             <FormItem>
               <FormLabel>Giới tính</FormLabel>
               <FormControl>
-                <Input placeholder="Giới tính" {...field} />
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Giới tính" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(Gender).map((gender) => (
+                      <SelectItem key={gender} value={gender}>
+                        {genderOptions[gender]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -125,7 +154,7 @@ export default function UpdateStudentForm({
           )}
         />
 
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending || isGetDetailLoading}>
           {isPending && <Loader2 className="animate-spin" />}
           Cập nhật
         </Button>

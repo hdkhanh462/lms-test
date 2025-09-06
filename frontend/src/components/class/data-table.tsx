@@ -13,9 +13,9 @@ import {
 import { ArrowUpDown, MoreHorizontal, PlusIcon } from "lucide-react";
 import * as React from "react";
 
-import AddParentForm from "@/components/parents/add-form";
-import UpdateParentForm from "@/components/parents/update-form";
-import AddStudentForm from "@/components/student/add-form";
+import AddClassForm from "@/components/class/add-form";
+import UpdateClassForm from "@/components/class/update-form";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -36,6 +36,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -43,9 +50,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { ParentWithIdInput } from "@/validations/schemas/parent.schema";
+import { useFetchClasses } from "@/data/class";
+import {
+  type ClassWithIdInput,
+  dayOfWeekOptions,
+  dayQueryOptions,
+} from "@/validations/schemas/class.schema";
 
-const columns: ColumnDef<ParentWithIdInput>[] = [
+const columns: ColumnDef<ClassWithIdInput>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -69,21 +81,7 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
-    header: "Họ và tên",
-    cell: ({ row }) => (
-      <div className="capitalize font-medium">{row.getValue("name")}</div>
-    ),
-  },
-  {
-    accessorKey: "phone",
-    header: "Số điện thoại",
-    cell: ({ row }) => {
-      return <div>{row.getValue("phone")}</div>;
-    },
-  },
-  {
-    accessorKey: "email",
+    accessorKey: "subject",
     header: ({ column }) => {
       return (
         <Button
@@ -91,18 +89,54 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="w-full justify-start !px-0"
         >
-          Email
+          Môn học
           <ArrowUpDown />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize font-medium">{row.getValue("subject")}</div>
+    ),
+  },
+  {
+    accessorKey: "teacherName",
+    header: "Giáo viên",
+    cell: ({ row }) => {
+      return <div>{row.getValue("teacherName")}</div>;
+    },
+  },
+  {
+    accessorKey: "maxStudents",
+    header: "Số học sinh tối đa",
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("maxStudents")}</div>
+    ),
+  },
+  {
+    accessorKey: "timeSlot",
+    header: "Thời gian",
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("timeSlot")}</div>
+    ),
+  },
+  {
+    accessorKey: "dayOfWeek",
+    header: "Ngày trong tuần",
+    cell: ({ row }) => (
+      <div>
+        {(row.getValue("dayOfWeek") as string[]).map((day) => (
+          <Badge key={day} variant="outline" className="mr-1">
+            {dayOfWeekOptions[day as keyof typeof dayOfWeekOptions]}
+          </Badge>
+        ))}
+      </div>
+    ),
   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const parent = row.original;
+      const _class = row.original;
 
       return (
         <DropdownMenu>
@@ -116,7 +150,7 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
             <DropdownMenuLabel>Hành động</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
-                navigator.clipboard.writeText(parent.id.toString())
+                navigator.clipboard.writeText(_class.id.toString())
               }
             >
               Sao chép ID
@@ -129,31 +163,15 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
               </DialogTrigger>
               <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
                 <DialogHeader>
-                  <DialogTitle>Chi tiết thông tin phụ huynh</DialogTitle>
+                  <DialogTitle>Chi tiết thông tin lớp học</DialogTitle>
                   <DialogDescription>
-                    Cập nhật thông tin phụ huynh.
+                    Cập nhật thông tin lớp học.
                   </DialogDescription>
                 </DialogHeader>
-                <UpdateParentForm id={parent.id} />
+                <UpdateClassForm id={_class.id} />
               </DialogContent>
             </Dialog>
             <DropdownMenuSeparator />
-            <Dialog>
-              <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  Thêm học sinh
-                </DropdownMenuItem>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Thêm mới học sinh</DialogTitle>
-                  <DialogDescription>
-                    Vui lòng điền thông tin học sinh.
-                  </DialogDescription>
-                </DialogHeader>
-                <AddStudentForm parentId={parent.id} />
-              </DialogContent>
-            </Dialog>
             <DropdownMenuItem>Xóa</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -162,7 +180,9 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
   },
 ];
 
-export function ParentDataTable({ data }: { data: ParentWithIdInput[] }) {
+export function ClassDataTable() {
+  const { data: classes, isLoading, setDayFilter } = useFetchClasses();
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -172,7 +192,7 @@ export function ParentDataTable({ data }: { data: ParentWithIdInput[] }) {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
-    data,
+    data: classes || [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -190,14 +210,18 @@ export function ParentDataTable({ data }: { data: ParentWithIdInput[] }) {
     },
   });
 
+  if (isLoading) {
+    return <div>Đang tải...</div>;
+  }
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Tìm kiếm theo email..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          placeholder="Tìm kiếm theo tên môn học..."
+          value={(table.getColumn("subject")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn("subject")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -208,16 +232,33 @@ export function ParentDataTable({ data }: { data: ParentWithIdInput[] }) {
                 <PlusIcon />
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="overflow-y-auto sm:max-h-[90vh]">
               <DialogHeader>
-                <DialogTitle>Thêm mới phụ huynh</DialogTitle>
+                <DialogTitle>Thêm mới lớp học</DialogTitle>
                 <DialogDescription>
-                  Vui lòng điền thông tin phụ huynh.
+                  Vui lòng điền thông tin lớp học.
                 </DialogDescription>
               </DialogHeader>
-              <AddParentForm />
+              <AddClassForm />
             </DialogContent>
           </Dialog>
+          <Select
+            onValueChange={(value) => {
+              console.log(value);
+              setDayFilter(value as keyof typeof dayQueryOptions);
+            }}
+          >
+            <SelectTrigger className="w-fit">
+              <SelectValue placeholder="Lọc theo ngày" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(dayQueryOptions).map(([key, value]) => (
+                <SelectItem key={key} value={key}>
+                  {value}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <div className="overflow-hidden rounded-md border">
