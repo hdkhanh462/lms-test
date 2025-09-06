@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "public"."Gender" AS ENUM ('MALE', 'FEMALE', 'OTHER');
+
 -- CreateTable
 CREATE TABLE "public"."parents" (
     "id" SERIAL NOT NULL,
@@ -12,8 +15,8 @@ CREATE TABLE "public"."parents" (
 CREATE TABLE "public"."students" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "dob" TIMESTAMP(3) NOT NULL,
-    "gender" TEXT NOT NULL,
+    "dob" TEXT NOT NULL,
+    "gender" "public"."Gender" NOT NULL,
     "current_grade" TEXT NOT NULL,
     "parent_id" INTEGER NOT NULL,
 

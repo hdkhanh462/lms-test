@@ -1,3 +1,4 @@
+import cors from "cors";
 import express from "express";
 
 import { BaseController } from "@/controllers/abstractions/base.controller";
@@ -18,6 +19,7 @@ class App {
 
   private initializeMiddlewares() {
     this.app.use(express.json());
+    this.app.use(cors());
   }
 
   private initializeErrorHandling() {
