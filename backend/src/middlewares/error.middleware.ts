@@ -14,11 +14,7 @@ export default function errorMiddleware(
   if (error instanceof ZodError) {
     return response.status(400).json({
       statusCode: 400,
-      message: "Validation Error",
-      errors: error.issues.map((issue) => ({
-        path: issue.path,
-        message: issue.message,
-      })),
+      message: error.issues[0]?.message || "Validation error",
     });
   }
 
