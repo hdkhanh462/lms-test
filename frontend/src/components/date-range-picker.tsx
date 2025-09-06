@@ -11,15 +11,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import type { DateRange } from "react-day-picker";
 
 type DatePickerProps = {
-  value?: Date;
-  onChange?: (value: Date | undefined) => void;
+  value?: DateRange;
+  onChange?: (value?: DateRange) => void;
 };
 
-export function DatePicker({ value, onChange }: DatePickerProps) {
+export function DateRangePicker({ value, onChange }: DatePickerProps) {
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState<Date | undefined>(value);
+  const [date, setDate] = useState<DateRange | undefined>(value);
+  const displayDate = date?.from
+    ? date.to
+      ? `${date.from.toLocaleDateString()} - ${date.to.toLocaleDateString()}`
+      : date.from.toLocaleDateString()
+    : "Chọn ngày";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -29,18 +35,13 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
           id="date"
           className="justify-between font-normal"
         >
-          {date
-            ? (date instanceof Date
-                ? date
-                : new Date(date)
-              ).toLocaleDateString()
-            : "Chọn ngày"}
+          {displayDate}
           <CalendarIcon />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto overflow-hidden p-0" align="start">
         <Calendar
-          mode="single"
+          mode="range"
           locale={vi}
           selected={date}
           onSelect={(date) => {

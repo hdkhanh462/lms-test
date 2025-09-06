@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 
 import { BaseController } from "@/controllers/abstractions/base.controller";
 import {
+  addClassSchema,
   ClassQuery,
   classQuerySchema,
   dayEnumSchema,
@@ -186,32 +187,16 @@ export default class ClassController extends BaseController {
 
   private createClass = async (request: Request, response: Response) => {
     const { subject, dayOfWeek, timeSlot, teacherName, maxStudents } =
-      request.body;
+      addClassSchema.parse(request.body);
 
     const normalizedTimeSlot = this.normalizeTimeSlot(timeSlot);
-    let validDayOfWeek: DayOfWeek[] = [];
-
-    // Xử lý dayOfWeek có thể là chuỗi hoặc mảng
-    if (Array.isArray(dayOfWeek)) {
-      validDayOfWeek = dayOfWeekSchema.parse(dayOfWeek);
-    } else if (typeof dayOfWeek === "string") {
-      validDayOfWeek = this.processDayQuery({
-        day: dayEnumSchema.parse(dayOfWeek),
-        days: [],
-      });
-    }
-
-    if (validDayOfWeek.length === 0) {
-      throw new HttpException(400, "dayOfWeek cần có ít nhất một ngày hợp lệ");
-    }
-
     const newClass = await this.prisma.class.create({
       data: {
         subject,
-        dayOfWeek: validDayOfWeek,
+        dayOfWeek,
         timeSlot: normalizedTimeSlot,
         teacherName,
-        maxStudents: Number(maxStudents),
+        maxStudents,
       },
     });
 

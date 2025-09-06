@@ -33,6 +33,9 @@ type UpdateStudentFormProps = {
   id: number;
 };
 
+// TODO: Fix lỗi ngày sinh không hiển thị đúng dữ liệu khi mở form
+// cần mở form 2 lần mới hiển thị đúng dữ liệu
+
 export default function UpdateStudentForm({ id }: UpdateStudentFormProps) {
   const { mutate, isPending } = useUpdateStudent();
   const { data, isLoading: isGetDetailLoading } = useGetStudentById(id);
@@ -42,6 +45,7 @@ export default function UpdateStudentForm({ id }: UpdateStudentFormProps) {
     defaultValues: data || {
       id,
       parentId: 0,
+      gender: Gender.Male,
       name: "",
       currentGrade: "",
     },
@@ -49,7 +53,6 @@ export default function UpdateStudentForm({ id }: UpdateStudentFormProps) {
 
   useEffect(() => {
     if (data) {
-      console.log("data", data);
       form.reset(data);
     }
   }, [data, form]);
@@ -154,7 +157,12 @@ export default function UpdateStudentForm({ id }: UpdateStudentFormProps) {
           )}
         />
 
-        <Button type="submit" disabled={isPending || isGetDetailLoading}>
+        <Button
+          type="submit"
+          disabled={
+            isPending || isGetDetailLoading || !data || !form.formState.isDirty
+          }
+        >
           {isPending && <Loader2 className="animate-spin" />}
           Cập nhật
         </Button>

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 
 import { BaseController } from "@/controllers/abstractions/base.controller";
 import HttpException from "@/exceptions/http-exception";
+import { addSubscriptionSchema } from "@/validations/schemas/subscription.schema";
 
 export default class SubscriptionController extends BaseController {
   public path = "/subscriptions";
@@ -14,49 +15,21 @@ export default class SubscriptionController extends BaseController {
   public initializeRoutes() {
     this.router.post(this.path, this.createSubscription);
     this.router.patch(`${this.path}/:id/use`, this.markAsUsed);
-    this.router.get(`${this.path}/:id`, this.getSubscriptions);
-  }
-
-  /**
-   * Kiểm tra ngày bắt đầu và ngày kết thúc hợp lệ.
-   * @param startDate - Ngày bắt đầu (Date hoặc string).
-   * @param endDate - Ngày kết thúc (Date hoặc string).
-   * @throws HttpException nếu ngày không hợp lệ.
-   */
-  private validateSubscriptionDates(
-    startDate: string | Date,
-    endDate: string | Date
-  ) {
-    const now = new Date();
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      throw new HttpException(400, "Ngày bắt đầu hoặc kết thúc không hợp lệ");
-    }
-    if (start < now) {
-      throw new HttpException(400, "Ngày bắt đầu phải là ngày trong tương lai");
-    }
-    if (end < start) {
-      throw new HttpException(400, "Ngày kết thúc phải sau ngày bắt đầu");
-    }
-
-    return { start, end };
+    this.router.get(this.path, this.getSubscriptions);
+    this.router.get(`${this.path}/:id`, this.getSubscriptionByID);
   }
 
   private createSubscription = async (request: Request, response: Response) => {
     const { studentId, packageName, startDate, endDate, totalSessions } =
-      request.body;
-
-    const { start, end } = this.validateSubscriptionDates(startDate, endDate);
+      addSubscriptionSchema.parse(request.body);
 
     const newSubscription = await this.prisma.subscription.create({
       data: {
-        studentId: Number(studentId),
+        studentId,
         packageName,
-        startDate: start,
-        endDate: end,
-        totalSessions: Number(totalSessions),
+        startDate,
+        endDate,
+        totalSessions,
       },
     });
 
@@ -66,7 +39,10 @@ export default class SubscriptionController extends BaseController {
     });
   };
 
-  private getSubscriptions = async (request: Request, response: Response) => {
+  private getSubscriptionByID = async (
+    request: Request,
+    response: Response
+  ) => {
     const { id } = request.params;
     const { studentId } = request.body;
 
@@ -81,6 +57,13 @@ export default class SubscriptionController extends BaseController {
       throw new HttpException(404, "Không tìm thấy gói học");
     }
 
+    return response.status(200).json(subscriptions);
+  };
+
+  private getSubscriptions = async (request: Request, response: Response) => {
+    const subscriptions = await this.prisma.subscription.findMany({
+      include: { student: { select: { name: true } } },
+    });
     return response.status(200).json(subscriptions);
   };
 

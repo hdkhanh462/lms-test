@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import {
   Select,
   SelectContent,
@@ -19,31 +21,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAddStudent } from "@/data/student";
 import {
-  Gender,
-  genderOptions,
-  studentSchema,
-  type StudentAddInput,
-} from "@/validations/schemas/student.schema";
-import { DatePicker } from "@/components/date-picker";
+  useGetSubscriptionById,
+  useUpdateSubscription,
+} from "@/data/subscription";
+import {
+  PackageSubscription,
+  packageSubscriptionOptions,
+  updateSubscriptionSchema,
+  type SubscriptionWithIdInput,
+} from "@/validations/schemas/subscription.schema";
 
-type AddStudentFormProps = {
-  parentId: number;
+type Props = {
+  id: number;
 };
 
-export default function AddStudentForm({ parentId }: AddStudentFormProps) {
-  const { mutate, isPending } = useAddStudent();
-  const form = useForm<StudentAddInput>({
-    resolver: zodResolver(studentSchema),
-    defaultValues: {
-      parentId,
-      name: "",
-      currentGrade: "",
+export default function UpdateSubscriptionForm({ id }: Props) {
+  const { mutate, isPending: isUpdatePending } = useUpdateSubscription();
+  const { data, isLoading: isGetDetailLoading } = useGetSubscriptionById(id);
+
+  const form = useForm<SubscriptionWithIdInput>({
+    resolver: zodResolver(updateSubscriptionSchema),
+    defaultValues: data || {
+      id,
+      totalSessions: 1,
+      usedSessions: 0,
     },
   });
 
-  function onSubmit(values: StudentAddInput) {
+  useEffect(() => {
+    if (data) {
+      form.reset(data);
+    }
+  }, [data, form]);
+
+  function onSubmit(values: SubscriptionWithIdInput) {
     console.log(values);
     mutate(values);
   }
@@ -53,7 +65,7 @@ export default function AddStudentForm({ parentId }: AddStudentFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="parentId"
+          name="id"
           render={({ field }) => (
             <FormItem hidden>
               <FormControl>
@@ -65,12 +77,11 @@ export default function AddStudentForm({ parentId }: AddStudentFormProps) {
         />
         <FormField
           control={form.control}
-          name="name"
+          name="studentId"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Họ và tên</FormLabel>
+            <FormItem hidden>
               <FormControl>
-                <Input placeholder="Họ và tên" {...field} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -78,35 +89,19 @@ export default function AddStudentForm({ parentId }: AddStudentFormProps) {
         />
         <FormField
           control={form.control}
-          name="dob"
+          name="packageName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Ngày sinh</FormLabel>
-              <FormControl>
-                <DatePicker
-                  value={field.value}
-                  onChange={(date) => field.onChange(date)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="gender"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Giới tính</FormLabel>
+              <FormLabel>Khóa học</FormLabel>
               <FormControl>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Giới tính" />
+                    <SelectValue placeholder="Chọn khóa học" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.values(Gender).map((gender) => (
-                      <SelectItem key={gender} value={gender}>
-                        {genderOptions[gender]}
+                    {Object.values(PackageSubscription).map((pkg) => (
+                      <SelectItem key={pkg} value={pkg}>
+                        {packageSubscriptionOptions[pkg]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -116,24 +111,31 @@ export default function AddStudentForm({ parentId }: AddStudentFormProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
-          name="currentGrade"
+          name="totalSessions"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Khối hiện tại</FormLabel>
+              <FormLabel>Tổng số buổi</FormLabel>
               <FormControl>
-                <Input placeholder="Khối hiện tại" {...field} />
+                <NumberInput placeholder="Tổng số buổi" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" disabled={isPending || !form.formState.isDirty}>
-          {isPending && <Loader2 className="animate-spin" />}
-          Thêm mới
+        <Button
+          type="submit"
+          disabled={
+            isUpdatePending ||
+            isGetDetailLoading ||
+            !data ||
+            !form.formState.isDirty
+          }
+        >
+          {isUpdatePending && <Loader2 className="animate-spin" />}
+          Cập nhật
         </Button>
       </form>
     </Form>

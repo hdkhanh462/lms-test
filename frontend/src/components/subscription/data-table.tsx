@@ -13,10 +13,8 @@ import {
 import { ArrowUpDown, MoreHorizontal, PlusIcon } from "lucide-react";
 import * as React from "react";
 
-import AddClassForm from "@/components/class/add-form";
-import StudentListDialog from "@/components/class/student-list-dialog";
-import UpdateClassForm from "@/components/class/update-form";
-import { Badge } from "@/components/ui/badge";
+import AddSubscriptionForm from "@/components/subscription/add-form";
+import UpdateSubscriptionForm from "@/components/subscription/update-form";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -37,13 +35,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -51,14 +42,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useFetchClasses } from "@/data/class";
-import {
-  type ClassWithIdInput,
-  dayOfWeekOptions,
-  dayQueryOptions,
-} from "@/validations/schemas/class.schema";
+import type { SubscriptionWithStudentInput } from "@/validations/schemas/subscription.schema";
+import MarkUsedButton from "@/components/subscription/mark-used-button";
 
-const columns: ColumnDef<ClassWithIdInput>[] = [
+const columns: ColumnDef<SubscriptionWithStudentInput>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -82,7 +69,7 @@ const columns: ColumnDef<ClassWithIdInput>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "subject",
+    accessorKey: "packageName",
     header: ({ column }) => {
       return (
         <Button
@@ -90,46 +77,57 @@ const columns: ColumnDef<ClassWithIdInput>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="w-full justify-start !px-0"
         >
-          Môn học
+          Tên khóa học
           <ArrowUpDown />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="capitalize font-medium">{row.getValue("subject")}</div>
+      <div className="capitalize font-medium">
+        {row.getValue("packageName")}
+      </div>
     ),
   },
   {
-    accessorKey: "teacherName",
-    header: "Giáo viên",
+    accessorKey: "student",
+    header: "Tên học sinh",
     cell: ({ row }) => {
-      return <div>{row.getValue("teacherName")}</div>;
+      return <div>{row.getValue<{ name: string }>("student")?.name}</div>;
     },
   },
   {
-    accessorKey: "maxStudents",
-    header: "Số học sinh tối đa",
+    accessorKey: "startDate",
+    header: "Ngày bắt đầu",
     cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("maxStudents")}</div>
+      <div className="lowercase">
+        {new Date(row.getValue("startDate")).toLocaleDateString()}
+      </div>
     ),
   },
   {
-    accessorKey: "timeSlot",
-    header: "Thời gian",
+    accessorKey: "endDate",
+    header: "Ngày kết thúc",
     cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("timeSlot")}</div>
+      <div className="lowercase">
+        {new Date(row.getValue("endDate")).toLocaleDateString()}
+      </div>
     ),
   },
   {
-    accessorKey: "dayOfWeek",
-    header: "Ngày học trong tuần",
+    accessorKey: "totalSessions",
+    header: () => <div className="text-end">Đăng ký</div>,
     cell: ({ row }) => (
-      <div>
-        {(row.getValue("dayOfWeek") as string[]).map((day) => (
-          <Badge key={day} variant="outline" className="mr-1">
-            {dayOfWeekOptions[day as keyof typeof dayOfWeekOptions]}
-          </Badge>
-        ))}
+      <div className="lowercase text-end">
+        {row.getValue("totalSessions")} buổi
+      </div>
+    ),
+  },
+  {
+    accessorKey: "usedSessions",
+    header: () => <div className="text-end">Đã học</div>,
+    cell: ({ row }) => (
+      <div className="lowercase text-end">
+        {row.getValue("usedSessions")} buổi
       </div>
     ),
   },
@@ -137,7 +135,7 @@ const columns: ColumnDef<ClassWithIdInput>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const _class = row.original;
+      const subscription = row.original;
 
       return (
         <DropdownMenu>
@@ -151,7 +149,7 @@ const columns: ColumnDef<ClassWithIdInput>[] = [
             <DropdownMenuLabel>Hành động</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
-                navigator.clipboard.writeText(_class.id.toString())
+                navigator.clipboard.writeText(subscription.id.toString())
               }
             >
               Sao chép ID
@@ -164,15 +162,16 @@ const columns: ColumnDef<ClassWithIdInput>[] = [
               </DialogTrigger>
               <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
                 <DialogHeader>
-                  <DialogTitle>Chi tiết thông tin lớp học</DialogTitle>
+                  <DialogTitle>Chi tiết thông tin khóa học</DialogTitle>
                   <DialogDescription>
-                    Cập nhật thông tin lớp học.
+                    Cập nhật thông tin khóa học.
                   </DialogDescription>
                 </DialogHeader>
-                <UpdateClassForm id={_class.id} />
+                <UpdateSubscriptionForm id={subscription.id} />
               </DialogContent>
             </Dialog>
-            <StudentListDialog classId={_class.id} />
+            {/* TODO: Kiểm tra hôm nay đã học chưa */}
+            <MarkUsedButton studentId={subscription.studentId} />
             <DropdownMenuSeparator />
             <DropdownMenuItem>Xóa</DropdownMenuItem>
           </DropdownMenuContent>
@@ -182,9 +181,11 @@ const columns: ColumnDef<ClassWithIdInput>[] = [
   },
 ];
 
-export function ClassDataTable() {
-  const { data: classes, isLoading, setDayFilter } = useFetchClasses();
-
+export function SubscriptionDataTable({
+  data,
+}: {
+  data: SubscriptionWithStudentInput[];
+}) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -194,7 +195,7 @@ export function ClassDataTable() {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
-    data: classes || [],
+    data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -212,18 +213,16 @@ export function ClassDataTable() {
     },
   });
 
-  if (isLoading) {
-    return <div>Đang tải...</div>;
-  }
-
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Tìm kiếm theo tên môn học..."
-          value={(table.getColumn("subject")?.getFilterValue() as string) ?? ""}
+          placeholder="Tìm kiếm theo tên khóa học..."
+          value={
+            (table.getColumn("packageName")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("subject")?.setFilterValue(event.target.value)
+            table.getColumn("packageName")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -234,34 +233,16 @@ export function ClassDataTable() {
                 <PlusIcon />
               </Button>
             </DialogTrigger>
-            <DialogContent className="overflow-y-auto sm:max-h-[90vh]">
+            <DialogContent>
               <DialogHeader>
-                <DialogTitle>Thêm mới lớp học</DialogTitle>
+                <DialogTitle>Thêm mới khóa học</DialogTitle>
                 <DialogDescription>
-                  Vui lòng điền thông tin lớp học.
+                  Vui lòng điền thông tin khóa học.
                 </DialogDescription>
               </DialogHeader>
-              <AddClassForm />
+              <AddSubscriptionForm />
             </DialogContent>
           </Dialog>
-          {/* TODO: Xử lý filter kiểu arrays [MONDAY, SUNDAY,...] */}
-          <Select
-            onValueChange={(value) => {
-              console.log(value);
-              setDayFilter(value as keyof typeof dayQueryOptions);
-            }}
-          >
-            <SelectTrigger className="w-fit">
-              <SelectValue placeholder="Lọc theo ngày" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(dayQueryOptions).map(([key, value]) => (
-                <SelectItem key={key} value={key}>
-                  {value}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
       <div className="overflow-hidden rounded-md border">

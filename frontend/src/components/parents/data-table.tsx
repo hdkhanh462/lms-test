@@ -137,7 +137,6 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
                 <UpdateParentForm id={parent.id} />
               </DialogContent>
             </Dialog>
-            <DropdownMenuSeparator />
             <Dialog>
               <DialogTrigger asChild>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -154,6 +153,7 @@ const columns: ColumnDef<ParentWithIdInput>[] = [
                 <AddStudentForm parentId={parent.id} />
               </DialogContent>
             </Dialog>
+            <DropdownMenuSeparator />
             <DropdownMenuItem>Xóa</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

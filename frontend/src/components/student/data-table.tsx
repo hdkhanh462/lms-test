@@ -92,10 +92,7 @@ const columns: ColumnDef<StudentWithIdInput>[] = [
     accessorKey: "dob",
     header: "Ngày sinh",
     cell: ({ row }) => {
-      const formattedDate = new Date(row.getValue("dob")).toLocaleDateString(
-        "vi-VN",
-        { year: "numeric", month: "2-digit", day: "2-digit" }
-      );
+      const formattedDate = new Date(row.getValue("dob")).toLocaleDateString();
       return <div>{formattedDate}</div>;
     },
   },
@@ -205,8 +202,6 @@ function InClassActions({ student }: { student: StudentWithIdInput }) {
         >
           Sao chép ID
         </DropdownMenuItem>
-        {/* TODO: Kiểm tra hôm nay đã học chưa */}
-        <DropdownMenuItem>Đánh dấu đã học</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem>Hủy đăng ký</DropdownMenuItem>
       </DropdownMenuContent>
@@ -216,7 +211,7 @@ function InClassActions({ student }: { student: StudentWithIdInput }) {
 
 type Props = {
   data: StudentWithIdInput[];
-  classId: number;
+  classId?: number;
 };
 
 export function StudentDataTable({ data, classId }: Props) {

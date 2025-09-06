@@ -59,7 +59,7 @@ export const classUpdateSchema = classSchema.extend({
 export const classRegisterSchema = z.object({
   classId: z.number().int().positive(),
   studentId: z
-    .number()
+    .number({ message: "Mã học sinh không hợp lệ." })
     .int()
     .positive({ message: "Mã học sinh không hợp lệ." }),
 });

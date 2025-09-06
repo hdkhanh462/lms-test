@@ -15,7 +15,7 @@ export default function StudentListDialog({ classId }: { classId: number }) {
   const { data: students, isLoading } = useFetchStudentsInClass(classId);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>;
   }
 
   return (
