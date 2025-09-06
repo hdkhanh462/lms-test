@@ -10,26 +10,30 @@
 1. **Tạo file `.env` tại tại thư mục gốc của dự án**  
    Ví dụ:
    ```
-    DB_HOST=postgres
-    DB_PORT=5432
-    DB_SCHEMA=public
-    POSTGRES_USER=postgres
-    POSTGRES_PASSWORD=P@ssw0rd
-    POSTGRES_DB=lms_db
+   POSTGRES_DB=lms_db
+   POSTGRES_USER=postgres
+   POSTGRES_PASSWORD=P@ssw0rd
 
-    DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${POSTGRES_DB}?schema=${DB_SCHEMA}&sslmode=prefer
+   DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+
+   VITE_BACKEND_URL=http://localhost:3000/api
 
    ```
 
 2. **Chạy Docker Compose**
    Mở terminal tại thư mục gốc dự án và chạy:
    ```
-   docker-compose up --build
+   docker-compose up -d --build
    ```
 
-3. **Truy cập ứng dụng**
-   - Frontend: [http://localhost:3000](http://localhost:3000)
-   - Backend: [http://localhost:3001](http://localhost:3001)
+3. **Migrate và Seeding dữ liệu**
+   ```
+   docker-compose exec backend npm run db:reset
+   ```
+
+4. **Truy cập ứng dụng**
+   - Frontend: [http://localhost:5173](http://localhost:5173)
+   - Backend: [http://localhost:3000](http://localhost:3000)
    - Database: PostgreSQL chạy ở cổng `5432`
 
 ## Một số lệnh hữu ích
@@ -47,5 +51,3 @@
 
 - Đảm bảo các biến môi trường trong `.env` khớp với cấu hình trong `docker-compose.yml`.
 - Nếu thay đổi code, có thể cần chạy lại với `--build`.
-
-```
