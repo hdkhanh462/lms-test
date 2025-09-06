@@ -1,7 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { addDays } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 
+import { DateRangePicker } from "@/components/date-range-picker";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,13 +23,11 @@ import {
 } from "@/components/ui/select";
 import { useAddSubscription } from "@/data/subscription";
 import {
+  addSubscriptionSchema,
   PackageSubscription,
   packageSubscriptionOptions,
-  addSubscriptionSchema,
   type AddSubscriptionInput,
 } from "@/validations/schemas/subscription.schema";
-import { DateRangePicker } from "@/components/date-range-picker";
-import { addDays } from "date-fns";
 
 export default function AddSubscriptionForm() {
   const today = new Date();
@@ -37,6 +37,7 @@ export default function AddSubscriptionForm() {
     defaultValues: {
       startDate: today,
       endDate: addDays(today, 7),
+      totalSessions: 7,
     },
   });
 

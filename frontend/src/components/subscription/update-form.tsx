@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
+import { DateRangePicker } from "@/components/date-range-picker";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -44,7 +45,9 @@ export default function UpdateSubscriptionForm({ id }: Props) {
     resolver: zodResolver(updateSubscriptionSchema),
     defaultValues: data || {
       id,
-      totalSessions: 1,
+      studentId: 0,
+      packageName: PackageSubscription.Basic,
+      totalSessions: 7,
       usedSessions: 0,
     },
   });
@@ -111,6 +114,30 @@ export default function UpdateSubscriptionForm({ id }: Props) {
             </FormItem>
           )}
         />
+        <FormItem>
+          <FormLabel>Ngày học</FormLabel>
+          <FormControl>
+            <DateRangePicker
+              value={{
+                from: form.getValues("startDate"),
+                to: form.getValues("endDate"),
+              }}
+              onChange={(value) => {
+                console.log(value);
+                if (value?.from && value.from instanceof Date) {
+                  form.setValue("startDate", value.from);
+                }
+                if (value?.to && value.to instanceof Date) {
+                  form.setValue("endDate", value.to);
+                }
+              }}
+            />
+          </FormControl>
+          <FormMessage>
+            {form.formState.errors.startDate?.message ||
+              form.formState.errors.endDate?.message}
+          </FormMessage>
+        </FormItem>
         <FormField
           control={form.control}
           name="totalSessions"

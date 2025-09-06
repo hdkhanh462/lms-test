@@ -160,7 +160,7 @@
 
 ### Subscriptions
 
-- **Khởi tạo gói học**
+- **Khởi tạo khóa học**
 
   ```
   POST /api/subscriptions
@@ -180,7 +180,7 @@
   PATCH /api/subscriptions/1/use
   ```
 
-- **Xem trạng thái gói học**
+- **Xem trạng thái khóa học**
   ```
   GET /api/subscriptions/1
   ```

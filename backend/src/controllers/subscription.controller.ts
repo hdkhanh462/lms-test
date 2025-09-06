@@ -34,7 +34,7 @@ export default class SubscriptionController extends BaseController {
     });
 
     return response.status(201).json({
-      message: "Tạo gói học thành công",
+      message: "Tạo khóa học thành công",
       id: newSubscription.id,
     });
   };
@@ -44,17 +44,15 @@ export default class SubscriptionController extends BaseController {
     response: Response
   ) => {
     const { id } = request.params;
-    const { studentId } = request.body;
 
     const subscriptions = await this.prisma.subscription.findUnique({
       where: {
         id: Number(id),
-        studentId: Number(studentId),
       },
     });
 
     if (!subscriptions) {
-      throw new HttpException(404, "Không tìm thấy gói học");
+      throw new HttpException(404, "Không tìm thấy khóa học");
     }
 
     return response.status(200).json(subscriptions);
@@ -79,7 +77,7 @@ export default class SubscriptionController extends BaseController {
     });
 
     if (!subscription) {
-      throw new HttpException(404, "Không tìm thấy gói học");
+      throw new HttpException(404, "Không tìm thấy khóa học");
     }
 
     if (subscription.usedSessions >= subscription.totalSessions) {
