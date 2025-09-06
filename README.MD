@@ -20,23 +20,25 @@
 
    ```
 
-2. **Chạy Docker Compose**
+2. **Chạy Docker Compose**  
    Mở terminal tại thư mục gốc dự án và chạy:
 
    ```
    docker-compose up -d --build
    ```
 
-3. **Migrate và Seeding dữ liệu**
+3. **Truy cập ứng dụng**
+
+   - Frontend: [http://localhost:5173](http://localhost:5173)
+   - Backend: [http://localhost:3000](http://localhost:3000)
+   - Database: PostgreSQL chạy ở cổng `5432`
+
+4. **Migrate database và Seeding dữ liệu**  
+   Chạy lệnh sau để tạo bảng và dữ liệu mẫu:
 
    ```
    docker-compose exec backend npm run db:reset
    ```
-
-4. **Truy cập ứng dụng**
-   - Frontend: [http://localhost:5173](http://localhost:5173)
-   - Backend: [http://localhost:3000](http://localhost:3000)
-   - Database: PostgreSQL chạy ở cổng `5432`
 
 ## Mô tả sơ lược Database Schema
 
