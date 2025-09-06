@@ -1,4 +1,3 @@
-
 # TeenUp LMS Test - Docker Setup
 
 ## Yêu cầu
@@ -9,6 +8,7 @@
 
 1. **Tạo file `.env` tại tại thư mục gốc của dự án**  
    Ví dụ:
+
    ```
    POSTGRES_DB=lms_db
    POSTGRES_USER=postgres
@@ -22,11 +22,13 @@
 
 2. **Chạy Docker Compose**
    Mở terminal tại thư mục gốc dự án và chạy:
+
    ```
    docker-compose up -d --build
    ```
 
 3. **Migrate và Seeding dữ liệu**
+
    ```
    docker-compose exec backend npm run db:reset
    ```
@@ -35,6 +37,52 @@
    - Frontend: [http://localhost:5173](http://localhost:5173)
    - Backend: [http://localhost:3000](http://localhost:3000)
    - Database: PostgreSQL chạy ở cổng `5432`
+
+## Mô tả sơ lược Database Schema
+
+- **Parent**
+
+  - `id`: Khóa chính, tự động tăng
+  - `name`: Tên phụ huynh
+  - `phone`: Số điện thoại (duy nhất)
+  - `email`: Email (duy nhất)
+  - Quan hệ: Một phụ huynh có nhiều học sinh (`children`)
+
+- **Student**
+
+  - `id`: Khóa chính, tự động tăng
+  - `name`: Tên học sinh
+  - `dob`: Ngày sinh
+  - `gender`: Giới tính (tùy chọn: MALE, FEMALE, OTHER)
+  - `currentGrade`: Lớp hiện tại
+  - `parentId`: Khóa ngoại tới Parent
+  - Quan hệ: Thuộc về một phụ huynh, có thể đăng ký nhiều lớp và nhiều subscription
+
+- **Class**
+
+  - `id`: Khóa chính, tự động tăng
+  - `subject`: Môn học
+  - `dayOfWeek`: Danh sách các ngày trong tuần
+  - `timeSlot`: Khung giờ học
+  - `teacherName`: Tên giáo viên
+  - `maxStudents`: Số học sinh tối đa
+  - Quan hệ: Có nhiều học sinh đăng ký
+
+- **ClassRegistration**
+
+  - `id`: Khóa chính, tự động tăng
+  - `studentId`: Khóa ngoại tới Student
+  - `classId`: Khóa ngoại tới Class
+  - Quan hệ: Một học sinh có thể đăng ký nhiều lớp, một lớp có nhiều học sinh
+
+- **Subscription**
+  - `id`: Khóa chính, tự động tăng
+  - `studentId`: Khóa ngoại tới Student
+  - `packageName`: Tên khóa học
+  - `startDate`, `endDate`: Ngày bắt đầu/kết thúc
+  - `totalSessions`: Tổng số buổi
+  - `usedSessions`: Số buổi đã dùng
+  - Quan hệ: Một học sinh có thể có nhiều Khóa học
 
 ## Một số lệnh hữu ích
 
